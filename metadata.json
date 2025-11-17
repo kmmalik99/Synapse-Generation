@@ -1,0 +1,8 @@
+{
+  "name": "Synapse Generation",
+  "description": "Your personal co-writer for scripts and prompts. Enhance rough ideas into powerful AI instructions and generate code snippets or full applications based on your needs.",
+  "requestFramePermissions": [
+    "microphone",
+    "geolocation"
+  ]
+}

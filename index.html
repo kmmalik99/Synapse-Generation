@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Synapse Generation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Prism.js CSS for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #f8fafc; /* tailwind slate-50 */
+        }
+        /* Custom scrollbar for code blocks to match the dark theme */
+        pre[class*="language-"]::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        pre[class*="language-"]::-webkit-scrollbar-track {
+            background: #2d2d2d;
+        }
+        pre[class*="language-"]::-webkit-scrollbar-thumb {
+            background-color: #555;
+            border-radius: 4px;
+        }
+        /* Animation for Toast */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translate3d(0, -20%, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+        .animate-fade-in-down {
+            animation: fadeInDown 0.3s ease-out forwards;
+        }
+    </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Poppins', 'sans-serif'],
+              mono: ['Roboto Mono', 'monospace'],
+            },
+          },
+        },
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <!-- Prism.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+  </body>
+</html>
