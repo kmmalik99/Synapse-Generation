@@ -4,7 +4,7 @@ import { useError } from '../hooks/useError';
 import { PhotoIcon, ArrowDownTrayIcon, TrashIcon } from './icons';
 
 interface ImageGeneratorProps {
-  state: { prompt: string; aspectRatio: string; imageUrl: string };
+  state: { prompt: string; aspectRatio: string; imageUrl: string | null };
   setState: React.Dispatch<React.SetStateAction<ImageGeneratorProps['state']>>;
   onReset: () => void;
 }
@@ -30,23 +30,17 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ state, setState, onRese
     })();
   }, []);
 
-  const handleSelectKey = async () => {
-    await (window as any).aistudio.openSelectKey();
-    setApiKeySelected(true); 
-  };
-
-
   const handleGenerate = async () => {
     if (!prompt.trim()) {
       showError('Please enter a prompt for the image.');
       return;
     }
     setIsLoading(true);
-    setState(prev => ({ ...prev, imageUrl: ''}));
+    setState(prev => ({ ...prev, imageUrl: null }));
     
     try {
         const url = await generateImage(prompt, aspectRatio);
-        setState(prev => ({ ...prev, imageUrl: url}));
+        setState(prev => ({ ...prev, imageUrl: url }));
     } catch (e) {
         const error = e instanceof Error ? e : new Error(String(e));
         let errorMessage = `Failed to generate image: ${error.message}`;
@@ -60,7 +54,12 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ state, setState, onRese
         setIsLoading(false);
     }
   };
-  
+
+  const handleSelectKey = async () => {
+    await (window as any).aistudio.openSelectKey();
+    setApiKeySelected(true); 
+  };
+
   if (!apiKeySelected) {
     return (
         <div className="bg-white border border-slate-200/75 rounded-xl shadow-sm p-8 text-center h-full flex flex-col justify-center items-center">
@@ -131,7 +130,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ state, setState, onRese
             {imageUrl && !isLoading && (
                 <a 
                     href={imageUrl} 
-                    download={`ai-image-${Date.now()}.png`}
+                    download={`ai-image-${Date.now()}.jpeg`}
                     className="text-sm flex items-center gap-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-md transition-colors font-medium"
                 >
                     <ArrowDownTrayIcon className="h-4 w-4" />

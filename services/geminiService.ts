@@ -28,22 +28,25 @@ export async function* enhancePromptStream(rawPrompt: string): AsyncGenerator<st
   }
 }
 
+// FIX: Added the missing `generateImage` function to be used by the ImageGenerator component.
 export async function generateImage(prompt: string, aspectRatio: string): Promise<string> {
-  const ai = getAi();
+  // Image generation requires a separate API key flow handled by the component.
+  // We re-initialize `ai` here to ensure the latest key from the dialog is used.
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
   const response = await ai.models.generateImages({
-      model: 'imagen-4.0-generate-001',
-      prompt: prompt,
-      config: {
-        numberOfImages: 1,
-        outputMimeType: 'image/png',
-        aspectRatio: aspectRatio,
-      },
+    model: 'imagen-4.0-generate-001',
+    prompt: prompt,
+    config: {
+      numberOfImages: 1,
+      outputMimeType: 'image/jpeg',
+      aspectRatio: aspectRatio,
+    },
   });
 
-  const base64ImageBytes = response.generatedImages[0].image.imageBytes;
-  return `data:image/png;base64,${base64ImageBytes}`;
+  const base64ImageBytes: string = response.generatedImages[0].image.imageBytes;
+  return `data:image/jpeg;base64,${base64ImageBytes}`;
 }
-
 
 export async function editImage(prompt: string, imageBase64: string, mimeType: string): Promise<string> {
   const ai = getAi();

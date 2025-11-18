@@ -26,7 +26,7 @@ const API_KEY = process.env.API_KEY;
 const initialChatState = { messages: [] as Message[], prompt: '', useSearch: false, useMaps: false, location: null as { lat: number, lng: number } | null };
 const initialEnhancerState = { messages: [] as Message[], prompt: '' };
 const initialAppBuilderState = { messages: [] as Message[], prompt: '', generatedCode: '<!-- Your generated app will appear here -->', enableThinking: false, attachment: null as any };
-const initialImageGeneratorState = { prompt: '', aspectRatio: '1:1', imageUrl: '' };
+const initialImageGeneratorState = { prompt: '', aspectRatio: '1:1', imageUrl: null as string | null };
 const initialImageEditorState = { prompt: '', originalImageFile: null as File | null, originalImagePreview: null as string | null, editedImageUrl: null as string | null };
 const initialImageAnalystState = { prompt: '', imageFile: null as File | null, imagePreview: null as string | null, analysis: '' };
 const initialImageAnimatorState = { prompt: '', imageFile: null as File | null, imagePreview: null as string | null, aspectRatio: '16:9', resolution: '720p', videoUrl: null as string | null, loadingMessage: '' };
@@ -36,6 +36,7 @@ const initialVideoAnalystState = { prompt: '', videoFile: null as File | null, v
 const initialVoiceChatState = { conversation: [] as { id: string; speaker: 'user' | 'model'; text: string; }[] };
 const initialTextToSpeechState = { messages: [] as Message[], prompt: '', voice: 'Zephyr' };
 const initialAudioTranscriberState = { transcript: '' };
+const initialSavedPromptsState = [] as string[];
 
 
 // --- State Persistence Helpers ---
@@ -96,6 +97,14 @@ const App: React.FC = () => {
   const [voiceChatState, setVoiceChatState] = useState(() => loadState('voiceChatState', initialVoiceChatState));
   const [textToSpeechState, setTextToSpeechState] = useState(() => loadState('textToSpeechState', initialTextToSpeechState));
   const [audioTranscriberState, setAudioTranscriberState] = useState(() => loadState('audioTranscriberState', initialAudioTranscriberState));
+  const [savedPrompts, setSavedPrompts] = useState<string[]>(() => {
+    try {
+        const saved = localStorage.getItem('savedPrompts');
+        return saved ? JSON.parse(saved) : initialSavedPromptsState;
+    } catch (e) {
+        return initialSavedPromptsState;
+    }
+  });
 
   // Shared state for video tools
   const [latestVideoOperation, setLatestVideoOperation] = useState<any | null>(() => loadState('latestVideoOperation', null));
@@ -163,6 +172,10 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('audioTranscriberState', JSON.stringify(audioTranscriberState));
   }, [audioTranscriberState]);
+
+  useEffect(() => {
+    localStorage.setItem('savedPrompts', JSON.stringify(savedPrompts));
+  }, [savedPrompts]);
 
 
   useEffect(() => {
@@ -284,7 +297,14 @@ const App: React.FC = () => {
                         <Chat state={chatState} setState={setChatState} onReset={() => setChatState(initialChatState)} />
                     </div>
                     <div className={mode === AppMode.Enhancer ? 'h-full' : 'hidden'}>
-                        <PromptEnhancer state={enhancerState} setState={setEnhancerState} onReset={() => setEnhancerState(initialEnhancerState)} onEnhanceComplete={handleEnhanceComplete} />
+                        <PromptEnhancer 
+                            state={enhancerState} 
+                            setState={setEnhancerState} 
+                            onReset={() => setEnhancerState(initialEnhancerState)} 
+                            onEnhanceComplete={handleEnhanceComplete}
+                            savedPrompts={savedPrompts}
+                            setSavedPrompts={setSavedPrompts}
+                        />
                     </div>
                     <div className={mode === AppMode.AppBuilder ? 'h-full' : 'hidden'}>
                         <AppBuilder state={appBuilderState} setState={setAppBuilderState} onReset={() => setAppBuilderState(initialAppBuilderState)} />
