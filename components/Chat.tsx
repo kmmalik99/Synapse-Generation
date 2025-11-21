@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Chat } from "@google/genai";
-import { PaperAirplaneIcon, UserIcon, SparklesIcon, AIIcon, TrashIcon, LinkIcon } from './icons';
+import { PaperAirplaneIcon, UserIcon, SparklesIcon, AIIcon, TrashIcon, LinkIcon, ClipboardIcon, CheckIcon } from './icons';
 import { Message } from '../types';
 import { useError } from '../hooks/useError';
 
@@ -34,6 +34,7 @@ const Chat: React.FC<ChatProps> = ({ state, setState, onReset }) => {
   const { messages, prompt, useSearch, useMaps, location } = state;
   const [isLoading, setIsLoading] = useState(false);
   const { showError } = useError();
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   
   const chatSessionRef = useRef<Chat | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -136,6 +137,12 @@ const Chat: React.FC<ChatProps> = ({ state, setState, onReset }) => {
     }
   };
 
+  const handleCopy = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedMessageId(id);
+    setTimeout(() => setCopiedMessageId(null), 2000);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -184,6 +191,13 @@ const Chat: React.FC<ChatProps> = ({ state, setState, onReset }) => {
                                         </li>
                                     ))}
                                 </ul>
+                            </div>
+                        )}
+                        {message.text && (
+                            <div className={`flex justify-end mt-1 ${message.role === 'user' ? 'text-emerald-200' : 'text-slate-400'}`}>
+                                <button onClick={() => handleCopy(message.text, message.id)} className={`p-1 rounded hover:bg-black/5 transition-colors`} title="Copy">
+                                    {copiedMessageId === message.id ? <CheckIcon className="h-3.5 w-3.5" /> : <ClipboardIcon className="h-3.5 w-3.5" />}
+                                </button>
                             </div>
                         )}
                     </div>

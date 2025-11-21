@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { generateImage } from '../services/geminiService';
 import { useError } from '../hooks/useError';
-import { PhotoIcon, ArrowDownTrayIcon, TrashIcon } from './icons';
+import { PhotoIcon, ArrowDownTrayIcon, TrashIcon, SparklesIcon } from './icons';
 
 interface ImageGeneratorProps {
   state: { prompt: string; aspectRatio: string; imageUrl: string | null };
@@ -17,18 +18,33 @@ const LoadingSpinner: React.FC = () => (
     </div>
 );
 
+const featureGraphicTemplates = [
+    { 
+        label: "Digital Neural Network", 
+        prompt: "A futuristic feature graphic showing a glowing digital brain composed of interconnecting nodes and code syntax, emerald green and deep blue neon lighting, dark background, 3D render, 8k resolution, symbolizing AI intelligence." 
+    },
+    { 
+        label: "Creative Workflow", 
+        prompt: "A split-screen artistic composition: on the left, a minimalist code editor; on the right, a vibrant, explosion of colorful creative assets (images, video icons, sound waves), demonstrating creation from code, cinematic lighting." 
+    },
+    { 
+        label: "Holographic App Builder", 
+        prompt: "A high-tech isometric view of a holographic smartphone interface floating above a sleek desk, surrounded by floating UI components and tool icons, depth of field, premium glass texture, professional software vibes." 
+    },
+    { 
+        label: "Voice to Action", 
+        prompt: "Abstract 3D visualization of sound waves transforming into solid geometric shapes and video frames, representing voice-controlled content creation, dynamic motion, vivid colors against a dark slate background." 
+    },
+    { 
+        label: "Synapse Studio Hub", 
+        prompt: "A wide-angle shot of a modern, virtual creative studio workspace with multiple floating screens displaying video editing timelines, image generation galleries, and chat interfaces, ultra-realistic, clean design." 
+    }
+];
+
 const ImageGenerator: React.FC<ImageGeneratorProps> = ({ state, setState, onReset }) => {
   const { prompt, aspectRatio, imageUrl } = state;
   const [isLoading, setIsLoading] = useState(false);
   const { showError } = useError();
-  const [apiKeySelected, setApiKeySelected] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-        const hasKey = await (window as any).aistudio.hasSelectedApiKey();
-        setApiKeySelected(hasKey);
-    })();
-  }, []);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -43,35 +59,12 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ state, setState, onRese
         setState(prev => ({ ...prev, imageUrl: url }));
     } catch (e) {
         const error = e instanceof Error ? e : new Error(String(e));
-        let errorMessage = `Failed to generate image: ${error.message}`;
-        if (error.message.includes("Requested entity was not found")) {
-            errorMessage = "API Key error. Please re-select your key and try again.";
-            setApiKeySelected(false);
-        }
-        showError(errorMessage);
+        showError(`Failed to generate image: ${error.message}`);
         console.error(error);
     } finally {
         setIsLoading(false);
     }
   };
-
-  const handleSelectKey = async () => {
-    await (window as any).aistudio.openSelectKey();
-    setApiKeySelected(true); 
-  };
-
-  if (!apiKeySelected) {
-    return (
-        <div className="bg-white border border-slate-200/75 rounded-xl shadow-sm p-8 text-center h-full flex flex-col justify-center items-center">
-            <h3 className="text-lg font-semibold text-slate-900 mb-3">API Key Required for Image Generation</h3>
-            <p className="text-slate-600 mb-4 max-w-md">The Imagen model requires you to select a project-linked API key. Please select your key to continue.</p>
-            <p className="text-xs text-slate-500 mb-4">For more information, see the <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">billing documentation</a>.</p>
-            <button onClick={handleSelectKey} className="bg-emerald-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-emerald-700">
-                Select API Key
-            </button>
-        </div>
-    );
-  }
 
   return (
     <div className="space-y-6 h-full overflow-y-auto pb-6">
@@ -84,6 +77,24 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ state, setState, onRese
             </button>
         </div>
         <div className="p-6 space-y-4">
+            <div>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-3 flex items-center gap-2">
+                    <SparklesIcon className="w-4 h-4 text-emerald-500" />
+                    Feature Graphic Templates
+                </label>
+                <div className="flex flex-wrap gap-2 mb-1">
+                    {featureGraphicTemplates.map((t, i) => (
+                        <button
+                            key={i}
+                            onClick={() => setState(prev => ({...prev, prompt: t.prompt, aspectRatio: '16:9'}))}
+                            className="text-xs bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-slate-200 hover:border-emerald-200 px-3 py-1.5 rounded-full transition-colors"
+                        >
+                            {t.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             <textarea
             value={prompt}
             onChange={(e) => setState(prev => ({...prev, prompt: e.target.value}))}

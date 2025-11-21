@@ -33,50 +33,50 @@ const SavedPromptsPanel: React.FC<{
 
     return (
         <div 
-            className={`fixed inset-0 z-30 transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            className={`fixed inset-0 z-50 transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
             aria-labelledby="saved-prompts-title"
             role="dialog"
             aria-modal="true"
         >
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/40" onClick={onClose}></div>
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div>
             
             {/* Panel */}
-            <div className={`absolute top-0 right-0 h-full w-full max-w-md bg-white shadow-xl flex flex-col transition-transform duration-300 ease-in-out transform ${isVisible ? 'translate-x-0' : 'translate-x-full'}`}>
-                <header className="p-4 border-b border-slate-200 flex justify-between items-center flex-shrink-0">
+            <div className={`absolute top-0 right-0 h-full w-full max-w-[85vw] sm:max-w-md bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out transform ${isVisible ? 'translate-x-0' : 'translate-x-full'}`}>
+                <header className="p-4 border-b border-slate-200 flex justify-between items-center flex-shrink-0 bg-slate-50">
                     <h2 id="saved-prompts-title" className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                        <BookmarkIcon className="h-5 w-5" />
+                        <BookmarkIcon className="h-5 w-5 text-emerald-600" />
                         Saved Prompts
                     </h2>
-                    <button onClick={onClose} className="p-1 rounded-full text-slate-500 hover:bg-slate-100">
+                    <button onClick={onClose} className="p-2 rounded-full text-slate-500 hover:bg-slate-200 transition-colors">
                         <XMarkIcon className="h-6 w-6" />
                     </button>
                 </header>
                 
                 <div className="flex-grow p-4 overflow-y-auto">
                     {prompts.length === 0 ? (
-                        <div className="text-center text-slate-500 h-full flex flex-col justify-center items-center">
+                        <div className="text-center text-slate-500 h-full flex flex-col justify-center items-center p-4">
                             <BookmarkIcon className="h-12 w-12 text-slate-300 mb-4" />
-                            <p>You haven't saved any prompts yet.</p>
-                            <p className="text-sm">Click the 'Save' button on an enhanced prompt to add it here.</p>
+                            <p className="font-medium">No saved prompts yet</p>
+                            <p className="text-sm mt-2">Enhance a prompt and click 'Save' to add it to this collection.</p>
                         </div>
                     ) : (
-                        <ul className="space-y-3">
+                        <ul className="space-y-4">
                             {prompts.map((prompt, index) => (
-                                <li key={index} className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                                    <p className="text-sm text-slate-700 line-clamp-3 mb-3">
+                                <li key={index} className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                                    <p className="text-sm text-slate-700 line-clamp-4 mb-4 font-mono bg-slate-50 p-2 rounded border border-slate-100">
                                         {prompt}
                                     </p>
                                     <div className="flex justify-end items-center gap-2">
-                                        <button onClick={() => onUse(prompt)} className="text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-md flex items-center gap-1">
-                                            <ArrowRightIcon className="h-3 w-3" />
+                                        <button onClick={() => onUse(prompt)} className="text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm">
+                                            <ArrowRightIcon className="h-3.5 w-3.5" />
                                             Use
                                         </button>
-                                        <button onClick={() => handleCopy(prompt)} className="text-xs font-semibold text-slate-600 bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-md flex items-center gap-1">
-                                            {copiedPrompt === prompt ? <CheckIcon className="h-3 w-3 text-emerald-600" /> : <ClipboardIcon className="h-3 w-3" />}
+                                        <button onClick={() => handleCopy(prompt)} className="text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors border border-slate-200">
+                                            {copiedPrompt === prompt ? <CheckIcon className="h-3.5 w-3.5 text-emerald-600" /> : <ClipboardIcon className="h-3.5 w-3.5" />}
                                             {copiedPrompt === prompt ? 'Copied' : 'Copy'}
                                         </button>
-                                        <button onClick={() => onDelete(prompt)} className="p-1.5 text-slate-500 hover:bg-red-100 hover:text-red-600 rounded-md">
+                                        <button onClick={() => onDelete(prompt)} className="p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors" title="Delete">
                                             <TrashIcon className="h-4 w-4" />
                                         </button>
                                     </div>
@@ -96,6 +96,7 @@ const PromptEnhancer: React.FC<PromptEnhancerProps> = ({ onEnhanceComplete, stat
   const [isLoading, setIsLoading] = useState(false);
   const { showError } = useError();
   const [isSavedPromptsVisible, setIsSavedPromptsVisible] = useState(false);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   
@@ -173,6 +174,12 @@ const PromptEnhancer: React.FC<PromptEnhancerProps> = ({ onEnhanceComplete, stat
       setSavedPrompts(prev => prev.filter(p => p !== promptToDelete));
   };
 
+  const handleCopy = (text: string, id: string) => {
+      navigator.clipboard.writeText(text);
+      setCopiedMessageId(id);
+      setTimeout(() => setCopiedMessageId(null), 2000);
+  };
+
 
   return (
     <>
@@ -210,7 +217,7 @@ const PromptEnhancer: React.FC<PromptEnhancerProps> = ({ onEnhanceComplete, stat
                             <pre className="whitespace-pre-wrap !bg-transparent !p-0 w-full h-full"><code className={`language-markdown font-mono ${message.role === 'user' ? '!text-white' : '!text-slate-800'}`}>{message.text}{isLoading && index === messages.length - 1 && <BlinkingCursor />}</code></pre>
                         </div>
                         {message.role === 'model' && !isLoading && message.text && (
-                            <div className="px-3 pb-3 mt-2 border-t border-slate-200/75 pt-3 flex justify-end gap-2">
+                            <div className="px-3 pb-3 mt-2 border-t border-slate-200/75 pt-3 flex flex-wrap justify-end gap-2">
                                  <button
                                     onClick={() => handleSavePrompt(message.text)}
                                     disabled={savedPrompts.includes(cleanedPrompt(message.text))}
@@ -220,11 +227,29 @@ const PromptEnhancer: React.FC<PromptEnhancerProps> = ({ onEnhanceComplete, stat
                                     <span>{savedPrompts.includes(cleanedPrompt(message.text)) ? 'Saved' : 'Save'}</span>
                                 </button>
                                 <button
+                                    onClick={() => handleCopy(message.text, message.id)}
+                                    className="bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition-colors duration-200 flex items-center gap-2 text-sm"
+                                >
+                                    {copiedMessageId === message.id ? <CheckIcon className="h-4 w-4 text-emerald-600" /> : <ClipboardIcon className="h-4 w-4" />}
+                                    <span>{copiedMessageId === message.id ? 'Copied' : 'Copy'}</span>
+                                </button>
+                                <button
                                     onClick={() => handleUsePrompt(message.text)}
                                     className="bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors duration-200 flex items-center gap-2 text-sm"
                                 >
                                     <span>Use as Script Prompt</span>
                                     <ArrowRightIcon className="h-4 w-4" />
+                                </button>
+                            </div>
+                        )}
+                        {message.role === 'user' && (
+                            <div className="flex justify-end mt-2">
+                                <button 
+                                    onClick={() => handleCopy(message.text, message.id)} 
+                                    className="text-emerald-200 hover:text-white hover:bg-emerald-500 p-1 rounded transition-colors"
+                                    title="Copy prompt"
+                                >
+                                    {copiedMessageId === message.id ? <CheckIcon className="h-4 w-4" /> : <ClipboardIcon className="h-4 w-4" />}
                                 </button>
                             </div>
                         )}

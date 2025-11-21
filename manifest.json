@@ -1,0 +1,21 @@
+{
+  "name": "Synapse Generation: AI Studio",
+  "short_name": "Synapse",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/12222/12222560.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/12222/12222560.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

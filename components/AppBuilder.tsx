@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Chat } from "@google/genai";
 import { Message } from '../types';
@@ -64,6 +65,7 @@ const AppBuilder: React.FC<AppBuilderProps> = ({ state, setState, onReset }) => 
   const { showError } = useError();
   const [isCopied, setIsCopied] = useState(false);
   const [activeMobileTab, setActiveMobileTab] = useState<'chat' | 'code' | 'preview'>('chat');
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
 
   const chatSessionRef = useRef<Chat | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -162,11 +164,18 @@ const AppBuilder: React.FC<AppBuilderProps> = ({ state, setState, onReset }) => 
     }
   };
 
-  const handleCopy = () => {
+  const handleCopyCode = () => {
     navigator.clipboard.writeText(generatedCode);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
+
+  const handleCopyMessage = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedMessageId(id);
+    setTimeout(() => setCopiedMessageId(null), 2000);
+  };
+
 
   const renderPanel = (panel: 'chat' | 'code' | 'preview') => {
     switch (panel) {
@@ -186,6 +195,13 @@ const AppBuilder: React.FC<AppBuilderProps> = ({ state, setState, onReset }) => 
                                 {message.text && <p className="text-sm whitespace-pre-wrap">{message.text}</p>}
                                 {message.content && <div className="mt-2">{message.content}</div>}
                                 {isLoading && index === messages.length - 1 && !message.content && <BlinkingCursor />}
+                                {message.text && (
+                                    <div className={`flex justify-end mt-1 ${message.role === 'user' ? 'text-emerald-200' : 'text-slate-400'}`}>
+                                        <button onClick={() => handleCopyMessage(message.text, message.id)} className={`p-1 rounded hover:bg-black/5 transition-colors`} title="Copy">
+                                            {copiedMessageId === message.id ? <CheckIcon className="h-3.5 w-3.5" /> : <ClipboardIcon className="h-3.5 w-3.5" />}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                             {message.role === 'user' && ( <div className="w-8 h-8 rounded-full bg-slate-400 flex items-center justify-center flex-shrink-0"><UserIcon className="w-5 h-5 text-white" /></div> )}
                         </div>
@@ -209,7 +225,7 @@ const AppBuilder: React.FC<AppBuilderProps> = ({ state, setState, onReset }) => 
             <div className="flex flex-col h-full bg-slate-800 border border-slate-700 rounded-xl shadow-sm text-white">
                 <div className="flex items-center justify-between p-3 border-b border-slate-700 flex-shrink-0">
                     <div className="flex items-center gap-2"><CodeBracketIcon className="h-5 w-5 text-slate-400" /><span className="font-mono text-sm">index.html</span></div>
-                    <button onClick={handleCopy} className="text-sm flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1 rounded-md transition-colors">{isCopied ? <CheckIcon className="h-4 w-4 text-emerald-400" /> : <ClipboardIcon className="h-4 w-4" />} {isCopied ? 'Copied!' : 'Copy'}</button>
+                    <button onClick={handleCopyCode} className="text-sm flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1 rounded-md transition-colors">{isCopied ? <CheckIcon className="h-4 w-4 text-emerald-400" /> : <ClipboardIcon className="h-4 w-4" />} {isCopied ? 'Copied!' : 'Copy'}</button>
                 </div>
                 <div className="flex-grow overflow-auto p-4"><pre className="!bg-transparent !p-0 h-full"><code className="language-html font-mono text-sm">{generatedCode}</code></pre></div>
             </div>
